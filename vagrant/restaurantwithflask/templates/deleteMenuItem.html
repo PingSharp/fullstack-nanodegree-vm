@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <h1>Delete</h1>
+        <h3>Are you sure?You want to delete this menuitem?</h3>
+        {% if name %}
+        <h4>{{ name }}</h4>
+        {% endif %}
+        <form method="POST" enctype="multipart/form-data" >
+            <input type="submit" value="delete">
+        </form>
+    </body>
+</html>
