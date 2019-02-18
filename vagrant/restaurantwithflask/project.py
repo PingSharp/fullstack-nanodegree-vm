@@ -50,7 +50,7 @@ def getMenuItems(rid):
     menuitems = session.query(MenuItem).filter_by(Restaurant_id = rid)
     return menuitems
 def addNewMenuItem(rname,rcourse,rdes,rprice,rid):
-    newMenuItem = MenuItem(name=rname[0],course=rcourse[0],description=rdes[0],price=rprice[0],Restaurant_id=rid)
+    newMenuItem = MenuItem(name=rname,course=rcourse,description=rdes,price=rprice,Restaurant_id=rid)
     session.add(newMenuItem)
     session.commit()
 def getMenuItem(rid,mid):
@@ -64,39 +64,28 @@ def getMenuItem(rid,mid):
 @app.route('/restaurant/<int:restaurant_id>/')
 def restaurantMenu(restaurant_id):
     
-    menuitems = session.query(MenuItem).filter_by(Restaurant_id = restaurant_id)
-    
-    output = ""
-    for item in menuitems:
-        output += "</br>"
-        output += item.name
-        output += "</br>"
-        output += item.price
-        output += "</br>"
-        output += item.description
-        output += "</br>"
-        output += "<a href='/restaurant/%s/%d/edit/'>Edit</a>"%(restaurant_id,item.id)
-        output += "</br>"
-        output += "<a href='/restaurant/%s/%d/delete/'>Delete</a>"%(restaurant_id,item.id)
-        output += "</br>"
-    output += "<a href='/restaurant/%s/new/'>Add new menu item</a>"%restaurant_id   
+    menuitems = session.query(MenuItem).filter_by(Restaurant_id = restaurant_id)  
 
-    return output
+    return render_template('menu.html',items = menuitems,rid = restaurant_id )
 
 @app.route('/restaurant/<int:restaurant_id>/new/', methods=('GET','POST'))
 def newMenuItem(restaurant_id):
     
     if request.method == 'POST':
-        ctype,pdict = cgi.parse_header(
-            request.headers.environ['CONTENT_TYPE']
-        )
-        if ctype == 'multipart/form-data':
-            fields = cgi.parse_multipart(request.input_stream,pdict)
-            mName = fields.get('menuName')
-            mCourse = fields.get('course')
-            mdes = fields.get('description')
-            mprice = fields.get('price')
-            addNewMenuItem(mName,mCourse,mdes,mprice,restaurant_id)
+        mName = request.form['menuName']
+        mCourse = request.form['course']
+        mdes = request.form['description']
+        mprice = request.form['price']
+    #      ctype,pdict = cgi.parse_header(
+    #         request.headers.environ['CONTENT_TYPE']
+    #     )
+    #     if ctype == 'multipart/form-data':
+    #         fields = cgi.parse_multipart(request.input_stream,pdict)
+    #         mName = fields.get('menuName')
+    #         mCourse = fields.get('course')
+    #         mdes = fields.get('description')
+    #         mprice = fields.get('price')
+        addNewMenuItem(mName,mCourse,mdes,mprice,restaurant_id) 
     
     return render_template('addNewMenuItem.html')
 
