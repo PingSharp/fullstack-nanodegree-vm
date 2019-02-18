@@ -93,16 +93,20 @@ def newMenuItem(restaurant_id):
 def editMenuItem(restaurant_id, menu_id):
     menuitem = getMenuItem(restaurant_id,menu_id)
     if request.method == 'POST':
-        ctype,pdict = cgi.parse_header(
-            request.headers.environ['CONTENT_TYPE']
-        )
-        if ctype == 'multipart/form-data':
-            fields = cgi.parse_multipart(request.input_stream,pdict)
-            mName = fields.get('menuName')
-            mCourse = fields.get('course')
-            mdes = fields.get('description')
-            mprice = fields.get('price')
-            changeMenuItem(menu_id,mName,mCourse,mdes,mprice)
+        mName = request.form['menuName']
+        mCourse = request.form['course']
+        mdes = request.form['description']
+        mprice = request.form['price']
+        # ctype,pdict = cgi.parse_header(
+        #     request.headers.environ['CONTENT_TYPE']
+        # )
+        # if ctype == 'multipart/form-data':
+        #     fields = cgi.parse_multipart(request.input_stream,pdict)
+        #     mName = fields.get('menuName')
+        #     mCourse = fields.get('course')
+        #     mdes = fields.get('description')
+        #     mprice = fields.get('price')
+        changeMenuItem(menu_id,mName,mCourse,mdes,mprice)
     
     return render_template('editMenuItem.html',name=menuitem.name,course=menuitem.course,description=menuitem.description,price=menuitem.price)
 
