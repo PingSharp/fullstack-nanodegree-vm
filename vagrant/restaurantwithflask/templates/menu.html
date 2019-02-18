@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <body>
+       
+    {% for item in items %}
+        </br>
+      {{ item.name }}
+        </br>
+        {{ item.price }}
+        </br>
+       {{ item.description }}
+        </br>
+       <a href='/restaurant/{{ rid }}/{{ item.id }}/edit/'>Edit</a>
+       </br>
+       <a href='/restaurant/{{ rid }}/{{ item.id }}/delete/'>Delete</a>
+        </br>
+        {% endfor %}
+       <a href='/restaurant/{{ rid }}/new/'>Add new menu item</a>
+
+    </body>
+</html>
