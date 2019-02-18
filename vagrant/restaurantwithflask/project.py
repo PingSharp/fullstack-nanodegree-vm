@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import (render_template,request)
+from flask import (render_template,request,url_for,redirect)
 app = Flask(__name__)
 import cgi
 from sqlalchemy import create_engine
@@ -40,10 +40,10 @@ def changeNameOfRestaurant(rid,rname):
     session.commit()
 def changeMenuItem(mid,nName,nCourse,nDes,nPrice):
     item = session.query(MenuItem).filter_by(id=mid).first()
-    item.name = nName[0]
-    item.course = nCourse[0]
-    item.description = nDes[0]
-    item.price = nPrice[0]
+    item.name = nName
+    item.course = nCourse
+    item.description = nDes
+    item.price = nPrice
     session.commit()
 
 def getMenuItems(rid):
@@ -86,6 +86,7 @@ def newMenuItem(restaurant_id):
     #         mdes = fields.get('description')
     #         mprice = fields.get('price')
         addNewMenuItem(mName,mCourse,mdes,mprice,restaurant_id) 
+        return redirect(url_for('restaurantMenu',restaurant_id=restaurant_id))
     
     return render_template('addNewMenuItem.html')
 
@@ -107,6 +108,7 @@ def editMenuItem(restaurant_id, menu_id):
         #     mdes = fields.get('description')
         #     mprice = fields.get('price')
         changeMenuItem(menu_id,mName,mCourse,mdes,mprice)
+        return redirect(url_for('restaurantMenu',restaurant_id=restaurant_id))
     
     return render_template('editMenuItem.html',name=menuitem.name,course=menuitem.course,description=menuitem.description,price=menuitem.price)
 
@@ -117,6 +119,7 @@ def deleteMenuItem(restaurant_id, menu_id):
     if request.method == 'POST':
         deleteMenuItemdb(menu_id)
         output = "<h2>You deleted this menu item succesfully!</h2>"
+        output += "<a href='/restaurant/%s/'>return</a>"%restaurant_id
         return output
     return render_template('deleteMenuItem.html',name = menuitem.name )
 if __name__ == '__main__':
