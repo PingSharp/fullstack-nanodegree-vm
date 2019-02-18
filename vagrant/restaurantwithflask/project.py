@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import (render_template,request,url_for,redirect)
+from flask import (render_template,request,url_for,redirect,flash)
 app = Flask(__name__)
 import cgi
 from sqlalchemy import create_engine
@@ -20,6 +20,7 @@ def getAllRestaurants():
     restaurants = session.query(Restaurant)
     return restaurants
 def getRestaurantById(rid):
+    restaurants = session.query(Restaurant)
     restaurant = restaurants.filter_by(id=rid).one()
     return restaurant
 def deleteRestaurant(rid):
@@ -65,8 +66,8 @@ def getMenuItem(rid,mid):
 def restaurantMenu(restaurant_id):
     
     menuitems = session.query(MenuItem).filter_by(Restaurant_id = restaurant_id)  
-
-    return render_template('menu.html',items = menuitems,rid = restaurant_id )
+    restaurant = getRestaurantById(restaurant_id)
+    return render_template('menu.html',items = menuitems,rid = restaurant_id,res = restaurant )
 
 @app.route('/restaurant/<int:restaurant_id>/new/', methods=('GET','POST'))
 def newMenuItem(restaurant_id):
@@ -86,6 +87,7 @@ def newMenuItem(restaurant_id):
     #         mdes = fields.get('description')
     #         mprice = fields.get('price')
         addNewMenuItem(mName,mCourse,mdes,mprice,restaurant_id) 
+        flash("You have added the menu item succesfully! ")
         return redirect(url_for('restaurantMenu',restaurant_id=restaurant_id))
     
     return render_template('addNewMenuItem.html')
@@ -108,6 +110,7 @@ def editMenuItem(restaurant_id, menu_id):
         #     mdes = fields.get('description')
         #     mprice = fields.get('price')
         changeMenuItem(menu_id,mName,mCourse,mdes,mprice)
+        flash("You have changed the menu item succesfully!")
         return redirect(url_for('restaurantMenu',restaurant_id=restaurant_id))
     
     return render_template('editMenuItem.html',name=menuitem.name,course=menuitem.course,description=menuitem.description,price=menuitem.price)
@@ -123,5 +126,6 @@ def deleteMenuItem(restaurant_id, menu_id):
         return output
     return render_template('deleteMenuItem.html',name = menuitem.name )
 if __name__ == '__main__':
+    app.secret_key = 'super_secret_key'
     app.debug = True
     app.run(host='0.0.0.0',port = 5000)
