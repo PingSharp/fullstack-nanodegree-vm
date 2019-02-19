@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import (render_template,request,url_for,redirect,flash)
+from flask import (render_template,request,url_for,redirect,flash,jsonify)
 app = Flask(__name__)
 import cgi
 from sqlalchemy import create_engine
@@ -60,8 +60,31 @@ def getMenuItem(rid,mid):
     mi = menuitem.one()
     return mi
 
-
 @app.route('/')
+@app.route('/restaurants/')
+def restaurants():
+    return"all restaurants"
+
+@app.route('/restaurants/<int:restaurant_id>/edit/')
+def editRestaurant(restaurant_id):
+    return"edit restaurant"
+
+@app.route('/restaurants/<int:restaurant_id>/delete/')
+def deleteRestaurant(restaurant_id):
+    return"delete restaurant"
+
+@app.route('/restaurants/new/')
+def addNewRestaurant():
+    return"add new restaurant"
+
+@app.route('/restaurants/JSON/')
+def restaurantsJson():
+    return"restaurants list in JSON"
+
+@app.route('/restaurants/<int:restaurant_id>/JSON')
+def restaurantJson():
+    return"restaurant in JSON"
+
 @app.route('/restaurant/<int:restaurant_id>/')
 def restaurantMenu(restaurant_id):
     
@@ -125,7 +148,16 @@ def deleteMenuItem(restaurant_id, menu_id):
         output += "<a href='/restaurant/%s/'>return</a>"%restaurant_id
         return output
     return render_template('deleteMenuItem.html',name = menuitem.name )
+
+@app.route("/restaurant/<int:restaurant_id>/menu/JSON")
+def getMenuItemsJson(restaurant_id):
+    items = getMenuItems(restaurant_id)
+    return jsonify(menuItems = [ i.serialize for i in items])
+@app.route("/restaurant/<int:restaurant_id>/menu/<int:menu_id>/JSON")
+def getMenuItemJson(restaurant_id,menu_id):
+    item = getMenuItem(restaurant_id,menu_id)
+    return jsonify(menuItem = item.serialize)
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
-    app.debug = True
-    app.run(host='0.0.0.0',port = 5000)
+    app.debug = False
+    app.run(host='127.0.0.1',port = 9000)
