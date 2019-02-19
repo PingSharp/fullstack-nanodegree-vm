@@ -32,6 +32,15 @@ class MenuItem(Base):
 
     def __repr__(self):
         return "<MenuItem(name='%s',course='%s',description='%s',price='%s')>"%(self.name,self.course,self.description,self.price)
+    @property
+    def serialize(self):
+        return {
+            'name' : self.name,
+            'description' : self.description,
+            'id' : self.id,
+            'price' : self.price,
+            'course' : self.course,
+        }
 engine = create_engine(
     'sqlite:///restaurantmenu.db'
 )
