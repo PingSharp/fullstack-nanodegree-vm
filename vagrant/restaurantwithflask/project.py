@@ -63,19 +63,19 @@ def getMenuItem(rid,mid):
 @app.route('/')
 @app.route('/restaurants/')
 def restaurants():
-    return"all restaurants"
+    return render_template('restaurants.html')
 
-@app.route('/restaurants/<int:restaurant_id>/edit/')
+@app.route('/restaurants/<int:restaurant_id>/edit/',methods=('GET','POST'))
 def editRestaurant(restaurant_id):
-    return"edit restaurant"
+    return render_template('editRestaurant.html')
 
-@app.route('/restaurants/<int:restaurant_id>/delete/')
+@app.route('/restaurants/<int:restaurant_id>/delete/',methods=('GET','POST'))
 def deleteRestaurant(restaurant_id):
-    return"delete restaurant"
+    return render_template('deleteRestaurant.html')
 
-@app.route('/restaurants/new/')
+@app.route('/restaurants/new/',methods=('GET','POST'))
 def addNewRestaurant():
-    return"add new restaurant"
+    return render_template('addNewRestaurant.html')
 
 @app.route('/restaurants/JSON/')
 def restaurantsJson():
