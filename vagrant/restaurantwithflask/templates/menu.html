@@ -1,20 +1,27 @@
 <!DOCTYPE html>
 <html>
-    <body>
+    <head>
+        <link rel=stylesheet type=text/css href="{{ url_for('static',filename='style.css') }}">
+    </head>
+    <body >
+        <div class="menu_content">
     {% if res %}
-    <h1>{{ res.name }}</h1>
+    <h1 class="restaurant_header">{{ res.name }}</h1>
     {% endif %}
     {% with messages = get_flashed_messages() %}  
     {% if messages %}
     <ul>
         {% for message in messages%}
-            <li><strong>{{message}}</strong></li>
+            <li id="message"><strong>{{message}}</strong></li>
         {% endfor %}
     </ul>
     {% endif %}
     {% endwith %}
+    <ul>
     {% for item in items %}
+   
         </br>
+        <li class="menu_item">
       {{ item.name }}
         </br>
         {{ item.price }}
@@ -24,9 +31,12 @@
        <a href='/restaurant/{{ rid }}/{{ item.id }}/edit/'>Edit</a>
        </br>
        <a href='/restaurant/{{ rid }}/{{ item.id }}/delete/'>Delete</a>
+       </li>
+    
         </br>
         {% endfor %}
+    </ul>
        <a href='/restaurant/{{ rid }}/new/'>Add new menu item</a>
-
+    </div>
     </body>
 </html>

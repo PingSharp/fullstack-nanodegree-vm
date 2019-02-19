@@ -1,0 +1,24 @@
+.restaurant_header{
+    color: brown;
+    text-align: center;
+    text-shadow: -2px -2px 3px;
+}
+.menu_content{
+    border-style: outset;
+    border-color: rgb(128, 67, 67);
+    border-radius: 5px;
+    box-shadow: 5px 5px 5px grey;
+    background-color: antiquewhite;
+}
+.menu_item{
+    list-style: none;
+    text-align: center;
+    font-size: 1.1em;
+    font-style: oblique;
+    color: chocolate;
+}
+#message{
+    list-style: none;
+    color: darkred;
+    font-style: italic;
+}
