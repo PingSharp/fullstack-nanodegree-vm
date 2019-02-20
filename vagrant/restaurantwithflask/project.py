@@ -23,7 +23,8 @@ def getRestaurantById(rid):
     restaurants = session.query(Restaurant)
     restaurant = restaurants.filter_by(id=rid).one()
     return restaurant
-def deleteRestaurant(rid):
+def DeleteRestaurant(rid):
+    restaurants = session.query(Restaurant)
     deleteObj = restaurants.filter_by(id=rid).one()
     session.delete(deleteObj)
     session.commit()
@@ -79,6 +80,10 @@ def editRestaurant(restaurant_id):
 
 @app.route('/restaurants/<int:restaurant_id>/delete/',methods=('GET','POST'))
 def deleteRestaurant(restaurant_id):
+    if request.method == 'POST':
+        DeleteRestaurant(restaurant_id)
+        flash("You have deleted the restaurant succesfully!")
+        return redirect(url_for('restaurants'))
     return render_template('deleteRestaurant.html')
 
 @app.route('/restaurants/new/',methods=('GET','POST'))
