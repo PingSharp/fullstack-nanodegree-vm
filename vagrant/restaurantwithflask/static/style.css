@@ -22,3 +22,23 @@
     color: darkred;
     font-style: italic;
 }
+form{
+    display: grid;
+}
+label{
+    margin-bottom: 5px;
+    font-family: monospace;
+    font-size: 1.2em;
+}
+input{
+    margin-bottom: 10px;
+    font-family: monospace;
+    font-size: 1.2em;
+    font-weight: 600;
+}
+a{
+    padding: 2px;
+    text-decoration: none;
+    color: coral;
+   
+}

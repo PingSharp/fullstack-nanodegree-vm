@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='style.css')}}">
+    </head>
     <body>
-        <h1>Delete</h1>
+        <h1 class="restaurant_header">Delete</h1>
         <h3>Are you sure?You want to delete this menuitem?</h3>
         {% if name %}
         <h4>{{ name }}</h4>
