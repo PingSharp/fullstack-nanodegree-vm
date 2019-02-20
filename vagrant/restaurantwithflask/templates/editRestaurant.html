@@ -2,6 +2,9 @@
 <html>
     <body>
         <h1>Edit restaurant</h1>
+        {% if name %}
+         <h2>{{ name }}</h2>
+        {% endif %}
         <form method="POST">
             <label>name:</label>
             <input type="text" name="restaurantName">

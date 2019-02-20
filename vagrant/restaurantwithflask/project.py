@@ -31,13 +31,14 @@ def deleteMenuItemdb(mid):
     deleteItem = session.query(MenuItem).filter_by(id=mid).one()
     session.delete(deleteItem)
     session.commit()
-def addNewRestaurant(rname):
-    restaurant1 = Restaurant(name = rname[0])
+def AddNewRestaurant(rname):
+    restaurant1 = Restaurant(name = rname)
     session.add(restaurant1)
     session.commit()
 def changeNameOfRestaurant(rid,rname):
+    restaurants = session.query(Restaurant)
     restaurant = restaurants.filter_by(id=rid).first()
-    restaurant.name = rname[0]
+    restaurant.name = rname
     session.commit()
 def changeMenuItem(mid,nName,nCourse,nDes,nPrice):
     item = session.query(MenuItem).filter_by(id=mid).first()
@@ -63,11 +64,18 @@ def getMenuItem(rid,mid):
 @app.route('/')
 @app.route('/restaurants/')
 def restaurants():
-    return render_template('restaurants.html')
+    restaurants = getAllRestaurants()
+    return render_template('restaurants.html',res = restaurants)
 
 @app.route('/restaurants/<int:restaurant_id>/edit/',methods=('GET','POST'))
 def editRestaurant(restaurant_id):
-    return render_template('editRestaurant.html')
+    res = getRestaurantById(restaurant_id)
+    if request.method == 'POST':
+        rName =request.form['restaurantName']
+        changeNameOfRestaurant(restaurant_id,rName)
+        flash("You have changed the name of the restaurant %s succesfully!"%rName)
+        return redirect(url_for('restaurants'))
+    return render_template('editRestaurant.html',name = res.name)
 
 @app.route('/restaurants/<int:restaurant_id>/delete/',methods=('GET','POST'))
 def deleteRestaurant(restaurant_id):
@@ -75,10 +83,16 @@ def deleteRestaurant(restaurant_id):
 
 @app.route('/restaurants/new/',methods=('GET','POST'))
 def addNewRestaurant():
+    if request.method == 'POST':
+        rName = request.form['restaurantName']
+        AddNewRestaurant(rName)
+        flash("You have added a new restaurant succesfully!")
+        return redirect(url_for('restaurants'))
     return render_template('addNewRestaurant.html')
 
 @app.route('/restaurants/JSON/')
 def restaurantsJson():
+
     return"restaurants list in JSON"
 
 @app.route('/restaurants/<int:restaurant_id>/JSON')
