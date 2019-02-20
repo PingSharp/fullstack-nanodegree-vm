@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html>
+    <head>
+        <link rel=stylesheet type=text/css href="{{ url_for('static',filename='restaurant.css') }}">
+    </head>
     <body>
-        <h1>Add new Restaurant</h1>
+        <h1 class="res_header">Add new Restaurant</h1>
         <form method="POST">
             <label>name:</label>
             <input type="text" name="restaurantName">

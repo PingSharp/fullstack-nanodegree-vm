@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html>
+    <head>
+        <link rel=stylesheet type=text/css href="{{ url_for('static',filename='restaurant.css') }}">
+    </head>
     <body>
-        <h1>Delete Restaurant</h1>
+        <h1 class="res_header">Delete Restaurant</h1>
         <h5>Are you sure you want to delete this restaurant?</h5>
         <form method="POST">
             <input type="submit" value="Delete">
