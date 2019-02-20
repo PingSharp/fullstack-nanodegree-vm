@@ -13,7 +13,12 @@ class Restaurant(Base):
         Integer,primary_key = True
     )
     menuitem = relationship("MenuItem",back_populates='restaurant',cascade="all, delete, delete-orphan")
-
+    @property
+    def serialize(self):
+        return {
+            'name' : self.name,
+            'id' : self.id,
+        }
     def __repr__(self):
         return "<Restaurant(name='%s')>"%self.name
     

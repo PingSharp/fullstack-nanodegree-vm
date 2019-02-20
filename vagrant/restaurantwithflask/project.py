@@ -97,12 +97,12 @@ def addNewRestaurant():
 
 @app.route('/restaurants/JSON/')
 def restaurantsJson():
-
-    return"restaurants list in JSON"
-
-@app.route('/restaurants/<int:restaurant_id>/JSON')
-def restaurantJson():
-    return"restaurant in JSON"
+    restaurants = getAllRestaurants()
+    return jsonify(restautants = [res.serialize for res in restaurants])
+@app.route('/restaurants/<int:restaurant_id>/JSON/')
+def restaurantJson(restaurant_id):
+    restaurant = getRestaurantById(restaurant_id)
+    return jsonify(restaurant = restaurant.serialize)
 
 @app.route('/restaurant/<int:restaurant_id>/')
 def restaurantMenu(restaurant_id):
