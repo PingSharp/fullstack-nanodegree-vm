@@ -1,0 +1,38 @@
+.res_header{
+    color: brown;
+    text-align: center;
+    font-family: fantasy;
+    font-size: 2.5em;
+}
+ul{
+    list-style: none;
+}
+.res_content{
+    background-color: rgb(219, 159, 159);
+    height: fit-content;
+    border-style: outset;
+    border-radius: 5px;
+    box-shadow: 5px 5px 5px grey;
+}
+ul {
+    text-align: center;
+}
+a {
+    padding: 2px;
+    text-decoration: none;
+    border-style: solid;
+    border-color: brown;
+    color: antiquewhite;
+}
+.res_name{
+    font-size: 1.2em;
+    font-family: cursive;
+    color: chocolate;
+    font-weight: 600;
+    margin: 10px;
+}
+#add_res{
+    position: fixed;
+    top: 40px;
+    right: 50px;
+}

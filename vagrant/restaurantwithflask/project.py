@@ -2,6 +2,7 @@ from flask import Flask
 from flask import (render_template,request,url_for,redirect,flash,jsonify)
 app = Flask(__name__)
 import cgi
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker,scoped_session
  
@@ -61,7 +62,18 @@ def getMenuItem(rid,mid):
     menuitem = menuitems.filter_by(id=mid)
     mi = menuitem.one()
     return mi
+@app.context_processor
+def override_url_for():
+    return dict(url_for=dated_url_for)
 
+def dated_url_for(endpoint, **values):
+    if endpoint == 'static':
+        filename = values.get('filename', None)
+        if filename:
+            file_path = os.path.join(app.root_path,
+                                     endpoint, filename)
+            values['q'] = int(os.stat(file_path).st_mtime)
+    return url_for(endpoint, **values)
 @app.route('/')
 @app.route('/restaurants/')
 def restaurants():
