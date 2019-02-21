@@ -3,6 +3,8 @@ from flask import (render_template,request,url_for,redirect,flash,jsonify)
 app = Flask(__name__)
 import cgi
 import os
+from flask import session as login_session
+import random,string
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker,scoped_session
  
@@ -49,7 +51,6 @@ def changeMenuItem(mid,nName,nCourse,nDes,nPrice):
     item.description = nDes
     item.price = nPrice
     session.commit()
-
 def getMenuItems(rid):
     menuitems = session.query(MenuItem).filter_by(Restaurant_id = rid)
     return menuitems
@@ -74,6 +75,12 @@ def dated_url_for(endpoint, **values):
                                      endpoint, filename)
             values['q'] = int(os.stat(file_path).st_mtime)
     return url_for(endpoint, **values)
+@app.route('/login')
+def showLogin():
+    state = ''.join(random.choice(string.ascii_uppercase + string.digits)
+                    for x in xrange(32))
+    login_session['state']=state
+    return "the login session is %s"%login_session['state']
 @app.route('/')
 @app.route('/restaurants/')
 def restaurants():
