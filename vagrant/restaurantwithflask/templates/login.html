@@ -18,5 +18,36 @@
                       data-approvalprompt="force">
                     </span>
             </div>
+            <div id="result">
+
+            </div>
+            <script>
+                    function signInCallback(authResult){
+                        if(authResult['code']){
+                                $("#signinButton").attr("style","disply: none");
+                                $.ajax({
+                                        type: "POST",
+                                        url: "/gconnect?state={{STATE}}",
+                                        processData: false,
+                                        contentType: "application/octet-stream; charset=utf-8",
+                                        data: authResult['code'],
+                                        success: function(result){
+                                                if (result) {
+                                                        $('#result').html('Login Succesful!</br>'+result+'</br>Redirecting...')
+                                                        setTimeout(function(){
+                                                                window.location.href = "/restaurant";
+                                                        },4000);
+                                                }
+                                                else{
+                                                        $('#result').html('Failed to make a server-side call. Check your configuration and console.')
+                                                }
+                                        }
+                                })
+                        }
+                        else if(authResult['error']){
+                                console.log("There was a error:"+authResult['error'])
+                        }
+                    }
+            </script>
     </body>
 </html>
