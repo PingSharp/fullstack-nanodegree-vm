@@ -206,30 +206,39 @@ def restaurants():
 
 @app.route('/restaurants/<int:restaurant_id>/edit/',methods=('GET','POST'))
 def editRestaurant(restaurant_id):
-    res = getRestaurantById(restaurant_id)
-    if request.method == 'POST':
-        rName =request.form['restaurantName']
-        changeNameOfRestaurant(restaurant_id,rName)
-        flash("You have changed the name of the restaurant %s succesfully!"%rName)
-        return redirect(url_for('restaurants'))
-    return render_template('editRestaurant.html',name = res.name)
+    if 'username' not in login_session:
+        return redirect(url_for('showLogin'))
+    else:
+        res = getRestaurantById(restaurant_id)
+        if request.method == 'POST':
+            rName =request.form['restaurantName']
+            changeNameOfRestaurant(restaurant_id,rName)
+            flash("You have changed the name of the restaurant %s succesfully!"%rName)
+            return redirect(url_for('restaurants'))
+        return render_template('editRestaurant.html',name = res.name)
 
 @app.route('/restaurants/<int:restaurant_id>/delete/',methods=('GET','POST'))
 def deleteRestaurant(restaurant_id):
-    if request.method == 'POST':
-        DeleteRestaurant(restaurant_id)
-        flash("You have deleted the restaurant succesfully!")
-        return redirect(url_for('restaurants'))
-    return render_template('deleteRestaurant.html')
+    if 'username'  not in login_session:
+        return redirect(url_for('showLogin'))
+    else:
+        if request.method == 'POST':
+            DeleteRestaurant(restaurant_id)
+            flash("You have deleted the restaurant succesfully!")
+            return redirect(url_for('restaurants'))
+        return render_template('deleteRestaurant.html')
 
 @app.route('/restaurants/new/',methods=('GET','POST'))
 def addNewRestaurant():
-    if request.method == 'POST':
-        rName = request.form['restaurantName']
-        AddNewRestaurant(rName)
-        flash("You have added a new restaurant succesfully!")
-        return redirect(url_for('restaurants'))
-    return render_template('addNewRestaurant.html')
+    if 'username'  not in login_session:
+        return redirect(url_for('showLogin'))
+    else:
+        if request.method == 'POST':
+            rName = request.form['restaurantName']
+            AddNewRestaurant(rName)
+            flash("You have added a new restaurant succesfully!")
+            return redirect(url_for('restaurants'))
+        return render_template('addNewRestaurant.html')
 
 @app.route('/restaurants/JSON/')
 def restaurantsJson():
@@ -249,12 +258,14 @@ def restaurantMenu(restaurant_id):
 
 @app.route('/restaurant/<int:restaurant_id>/new/', methods=('GET','POST'))
 def newMenuItem(restaurant_id):
-    
-    if request.method == 'POST':
-        mName = request.form['menuName']
-        mCourse = request.form['course']
-        mdes = request.form['description']
-        mprice = request.form['price']
+    if 'username'  not in login_session:
+        return redirect(url_for('showLogin'))
+    else:
+        if request.method == 'POST':
+            mName = request.form['menuName']
+            mCourse = request.form['course']
+            mdes = request.form['description']
+            mprice = request.form['price']
     #      ctype,pdict = cgi.parse_header(
     #         request.headers.environ['CONTENT_TYPE']
     #     )
@@ -264,20 +275,23 @@ def newMenuItem(restaurant_id):
     #         mCourse = fields.get('course')
     #         mdes = fields.get('description')
     #         mprice = fields.get('price')
-        addNewMenuItem(mName,mCourse,mdes,mprice,restaurant_id) 
-        flash("You have added the menu item succesfully! ")
-        return redirect(url_for('restaurantMenu',restaurant_id=restaurant_id))
+            addNewMenuItem(mName,mCourse,mdes,mprice,restaurant_id) 
+            flash("You have added the menu item succesfully! ")
+            return redirect(url_for('restaurantMenu',restaurant_id=restaurant_id))
     
-    return render_template('addNewMenuItem.html')
+        return render_template('addNewMenuItem.html')
 
 @app.route('/restaurant/<int:restaurant_id>/<int:menu_id>/edit/',methods=('GET','POST'))
 def editMenuItem(restaurant_id, menu_id):
-    menuitem = getMenuItem(restaurant_id,menu_id)
-    if request.method == 'POST':
-        mName = request.form['menuName']
-        mCourse = request.form['course']
-        mdes = request.form['description']
-        mprice = request.form['price']
+    if 'username'  not in login_session:
+        return redirect(url_for('showLogin'))
+    else:
+        menuitem = getMenuItem(restaurant_id,menu_id)
+        if request.method == 'POST':
+            mName = request.form['menuName']
+            mCourse = request.form['course']
+            mdes = request.form['description']
+            mprice = request.form['price']
         # ctype,pdict = cgi.parse_header(
         #     request.headers.environ['CONTENT_TYPE']
         # )
@@ -287,22 +301,25 @@ def editMenuItem(restaurant_id, menu_id):
         #     mCourse = fields.get('course')
         #     mdes = fields.get('description')
         #     mprice = fields.get('price')
-        changeMenuItem(menu_id,mName,mCourse,mdes,mprice)
-        flash("You have changed the menu item succesfully!")
-        return redirect(url_for('restaurantMenu',restaurant_id=restaurant_id))
+            changeMenuItem(menu_id,mName,mCourse,mdes,mprice)
+            flash("You have changed the menu item succesfully!")
+            return redirect(url_for('restaurantMenu',restaurant_id=restaurant_id))
     
-    return render_template('editMenuItem.html',name=menuitem.name,course=menuitem.course,description=menuitem.description,price=menuitem.price)
+        return render_template('editMenuItem.html',name=menuitem.name,course=menuitem.course,description=menuitem.description,price=menuitem.price)
 
 
 @app.route("/restaurant/<int:restaurant_id>/<int:menu_id>/delete/",methods=('GET','POST'))
 def deleteMenuItem(restaurant_id, menu_id):
-    menuitem = getMenuItem(restaurant_id,menu_id)
-    if request.method == 'POST':
-        deleteMenuItemdb(menu_id)
-        output = "<h2>You deleted this menu item succesfully!</h2>"
-        output += "<a href='/restaurant/%s/'>return</a>"%restaurant_id
-        return output
-    return render_template('deleteMenuItem.html',name = menuitem.name )
+    if 'username' not in login_session:
+        return redirect(url_for('showLogin'))
+    else:
+        menuitem = getMenuItem(restaurant_id,menu_id)
+        if request.method == 'POST':
+            deleteMenuItemdb(menu_id)
+            output = "<h2>You deleted this menu item succesfully!</h2>"
+            output += "<a href='/restaurant/%s/'>return</a>"%restaurant_id
+            return output
+        return render_template('deleteMenuItem.html',name = menuitem.name )
 
 @app.route("/restaurant/<int:restaurant_id>/menu/JSON")
 def getMenuItemsJson(restaurant_id):
