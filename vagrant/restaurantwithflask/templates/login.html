@@ -33,10 +33,10 @@
                                         data: authResult['code'],
                                         success: function(result){
                                                 if (result) {
-                                                        $('#result').html('Login Succesful!</br>'+result+'</br>Redirecting...')
-                                                        setTimeout(function(){
+                                                        $('#result').html('Login Succesful!</br>')
+                                                        /* setTimeout(function(){
                                                                 window.location.href = "/restaurants/";
-                                                        },4000);
+                                                        },4000); */
                                                 }
                                                 else{
                                                         $('#result').html('Failed to make a server-side call. Check your configuration and console.')

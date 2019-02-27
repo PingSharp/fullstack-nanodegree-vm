@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel=stylesheet type=text/css href="{{ url_for('static',filename='style.css') }}">
+    </head>
+    <body >
+        <div class="menu_content">
+    {% if res %}
+    <h1 class="restaurant_header">{{ res.name }}</h1>
+    {% endif %}
+    <ul>
+    {% for item in items %}
+   
+        </br>
+        <li class="menu_item">
+      {{ item.name }}
+        </br>
+        {{ item.price }}
+        </br>
+       {{ item.description }}
+        </br>
+       </li>
+    
+        </br>
+        {% endfor %}
+    </ul>
+    </div>
+    </body>
+</html>

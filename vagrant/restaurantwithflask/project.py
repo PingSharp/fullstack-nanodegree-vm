@@ -15,14 +15,14 @@ import httplib2
 import json
 from flask import make_response
 import requests
-from database_setup import Restaurant, Base, MenuItem
+from database_setup import Restaurant, Base, MenuItem, User
 
 CLIENT_ID = json.loads(
     open('secret.json','r').read()
 )['web']['client_id']
 APPLICATION_NAME = "Restaurant Menu Application"
  
-engine = create_engine('sqlite:///restaurantmenu.db')
+engine = create_engine('sqlite:///restaurantmenuwithusers.db')
 # Bind the engine to the metadata of the Base class so that the
 # declaratives can be accessed through a DBSession instance
 Base.metadata.bind = engine
@@ -47,8 +47,8 @@ def deleteMenuItemdb(mid):
     deleteItem = session.query(MenuItem).filter_by(id=mid).one()
     session.delete(deleteItem)
     session.commit()
-def AddNewRestaurant(rname):
-    restaurant1 = Restaurant(name = rname)
+def AddNewRestaurant(rname,uId):
+    restaurant1 = Restaurant(name = rname,user_id = uId)
     session.add(restaurant1)
     session.commit()
 def changeNameOfRestaurant(rid,rname):
@@ -66,8 +66,12 @@ def changeMenuItem(mid,nName,nCourse,nDes,nPrice):
 def getMenuItems(rid):
     menuitems = session.query(MenuItem).filter_by(Restaurant_id = rid)
     return menuitems
-def addNewMenuItem(rname,rcourse,rdes,rprice,rid):
-    newMenuItem = MenuItem(name=rname,course=rcourse,description=rdes,price=rprice,Restaurant_id=rid)
+def addNewUser(uname,uemail,upicture):
+    newUser = User(name=uname,email=uemail,picture=upicture)
+    session.add(newUser)
+    session.commit()
+def addNewMenuItem(rname,rcourse,rdes,rprice,rid,uId):
+    newMenuItem = MenuItem(name=rname,course=rcourse,description=rdes,price=rprice,Restaurant_id=rid,user_id=uId)
     session.add(newMenuItem)
     session.commit()
 def getMenuItem(rid,mid):
@@ -152,21 +156,16 @@ def gconnect():
     answer = requests.get(userinfo_url,params=params)
 
     data = answer.json()
-
+    user = session.query(User).filter_by(id=1).one();
+    print user
     login_session['username'] = data['name']
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
-
-    output = ''
-    output += '<h1>Welcome, '
-    output += login_session['username']
-    output += '!</h1>'
-    output += '<img src="'
-    output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
-    flash("you are now logged in as %s" % login_session['username'])
-    print "done!"
-    return output
+    createUser(login_session)
+    if checkUserHasRestaurant(login_session['user_id']):
+         return redirect(url_for('restaurants'))
+    else:
+        return redirect(url_for('restaurantsforPublic'))
 @app.route('/gdisconnect')
 def gdisconnect():
     access_token = login_session.get('access_token')
@@ -190,6 +189,7 @@ def gdisconnect():
         del login_session['username']
         del login_session['email']
         del login_session['picture']
+        del login_session['user_id']
         response = make_response(json.dumps("succesfully disconnected!"),200)
         response.headers['Content-Type'] = 'application/json'
         return response
@@ -198,11 +198,45 @@ def gdisconnect():
         response.headers["Content-Type"] = 'application/json'
         return response
 
+def createUser(login_session):
+    userExist = getUserId(login_session['email'])
+    if(userExist == None):
+        usertable = session.query(User)
+        print usertable
+        addNewUser(login_session['username'],login_session['email'],login_session['picture'])
+        login_session['user_id'] = getUserId(login_session['email'])
+    else:
+        print "User exist!id:%s"%userExist
+        login_session['user_id'] = userExist
+
+def getUserInfo(userId):
+    user = session.query(User).filter_by(id = userId).one()
+    return user
+def getUserId(userEmail):
+    try:   
+        user = session.query(User).filter_by(email=userEmail).one()
+        userId = user.id
+        return userId
+    except:
+        return None
+def checkUserHasRestaurant(userId):
+    try:
+        restaurant = session.query(Restaurant).filter_by(user_id=userId).one().name
+        return True
+    except:
+        return False
+        
+
 @app.route('/')
 @app.route('/restaurants/')
 def restaurants():
     restaurants = getAllRestaurants()
     return render_template('restaurants.html',res = restaurants)
+@app.route('/')
+@app.route('/restaurantsforpublic/')
+def restaurantsforPublic():
+    restaurants = getAllRestaurants()
+    return render_template('restaurantspublic.html',res = restaurants)
 
 @app.route('/restaurants/<int:restaurant_id>/edit/',methods=('GET','POST'))
 def editRestaurant(restaurant_id):
@@ -235,6 +269,7 @@ def addNewRestaurant():
     else:
         if request.method == 'POST':
             rName = request.form['restaurantName']
+            uId = getUserId(login_session['email'])
             AddNewRestaurant(rName)
             flash("You have added a new restaurant succesfully!")
             return redirect(url_for('restaurants'))
@@ -266,6 +301,7 @@ def newMenuItem(restaurant_id):
             mCourse = request.form['course']
             mdes = request.form['description']
             mprice = request.form['price']
+            uid = getUserId(login_session['email'])
     #      ctype,pdict = cgi.parse_header(
     #         request.headers.environ['CONTENT_TYPE']
     #     )
@@ -275,7 +311,7 @@ def newMenuItem(restaurant_id):
     #         mCourse = fields.get('course')
     #         mdes = fields.get('description')
     #         mprice = fields.get('price')
-            addNewMenuItem(mName,mCourse,mdes,mprice,restaurant_id) 
+            addNewMenuItem(mName,mCourse,mdes,mprice,restaurant_id,uid) 
             flash("You have added the menu item succesfully! ")
             return redirect(url_for('restaurantMenu',restaurant_id=restaurant_id))
     
