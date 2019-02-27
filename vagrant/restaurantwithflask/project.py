@@ -87,6 +87,7 @@ def dated_url_for(endpoint, **values):
                                      endpoint, filename)
             values['q'] = int(os.stat(file_path).st_mtime)
     return url_for(endpoint, **values)
+# protect user away for session hijacking,if user open the login page,he will get a random state code.
 @app.route('/login')
 def showLogin():
     state = ''.join(random.choice(string.ascii_uppercase + string.digits)
@@ -116,6 +117,7 @@ def gconnect():
 
     access_token = credentials.access_token
     url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'%access_token)
+    print access_token
     h = httplib2.Http()
     result = json.loads(h.request(url,'GET')[1])
     if result.get('error') is not None:
@@ -165,6 +167,37 @@ def gconnect():
     flash("you are now logged in as %s" % login_session['username'])
     print "done!"
     return output
+@app.route('/gdisconnect')
+def gdisconnect():
+    access_token = login_session.get('access_token')
+    if access_token is None:
+        print"access_token is none,the user is not connected"
+        response = make_response(json.dump("current user not connected!"),401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    print"access_token is %s"%access_token
+    print"user name is %s"%login_session['username']
+    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
+    h = httplib2.Http()
+    result1 = h.request(url,'GET')
+    result2 = result1[0]
+    print login_session
+    print result1
+    print result2
+    if result2['status'] == '200':
+        del login_session['access_token']
+        del login_session['gplus_id']
+        del login_session['username']
+        del login_session['email']
+        del login_session['picture']
+        response = make_response(json.dumps("succesfully disconnected!"),200)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    else:
+        response = make_response(json.dumps("Failed to revoke token for given user.",400))
+        response.headers["Content-Type"] = 'application/json'
+        return response
+
 @app.route('/')
 @app.route('/restaurants/')
 def restaurants():
