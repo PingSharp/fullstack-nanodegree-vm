@@ -7,6 +7,72 @@
           <script src="//apis.google.com/js/platform.js?onload=start"> </script>
     </head>
     <body>
+            
+        <script>
+                window.fbAsyncInit = function() {
+                  FB.init({
+                    appId      : '508042866393927',
+                    cookie     : true,
+                    xfbml      : true,
+                    version    : 'v3.2'
+                  });
+                    
+                  FB.AppEvents.logPageView();   
+                  
+                };
+              
+                (function(d, s, id){
+                   var js, fjs = d.getElementsByTagName(s)[0];
+                   if (d.getElementById(id)) {return;}
+                   js = d.createElement(s); js.id = id;
+                   js.src = "https://connect.facebook.net/en_US/sdk.js";
+                   fjs.parentNode.insertBefore(js, fjs);
+                 }(document, 'script', 'facebook-jssdk'));
+                 
+                function checkLoginState() {
+                    FB.getLoginStatus(function(response) {
+                    statusChangeCallback(response);
+                });
+                function statusChangeCallback(res){
+                        if(res['status']==="connected"){
+                                if(res['authResponse']['accessToken']){
+                                $.ajax({
+                                        type: "POST",
+                                        url: "/fconnect?state={{STATE}}",
+                                        processData: false,
+                                        contentType: "application/octet-stream; charset=utf-8",
+                                        data: res['authResponse']['accessToken'],
+                                        success: function(result){
+                                                if (result) {
+                                                        $('#result').html('Login Succesful!</br>')
+                                                         setTimeout(function(){
+                                                                 console.log(result);
+                                                                 if(result==='False'){
+                                                                         window.location.href = "/restaurantsforpublic/";  
+                                                                 }
+                                                                 else if(result==='True'){
+                                                                         window.location.href = "/restaurants/";
+                                                                 }
+                                                                 else{
+                                                                        
+                                                                 }
+                                                                // window.location.href = "/restaurants/";
+                                                        },4000); 
+                                                }
+                                                else{
+                                                        $('#result').html('Failed to make a server-side call. Check your configuration and console.')
+                                                }
+                                        }
+                                })
+                        }
+                        else if(authResult['error']){
+                                console.log("There was a error:"+authResult['error'])
+                        }   
+                        }
+                }
+}
+                
+        </script>
             <div id="signinButton">
                     <span class="g-signin"
                       data-scope="openid email"
@@ -18,6 +84,11 @@
                       data-approvalprompt="force">
                     </span>
             </div>
+            
+            <fb:login-button 
+                scope="public_profile,email"
+                onlogin="checkLoginState();">
+                </fb:login-button>
             <div id="result">
 
             </div>
@@ -34,9 +105,19 @@
                                         success: function(result){
                                                 if (result) {
                                                         $('#result').html('Login Succesful!</br>')
-                                                        /* setTimeout(function(){
-                                                                window.location.href = "/restaurants/";
-                                                        },4000); */
+                                                         setTimeout(function(){
+                                                                 console.log(result);
+                                                                 if(result==='False'){
+                                                                         window.location.href = "/restaurantsforpublic/";  
+                                                                 }
+                                                                 else if(result==='True'){
+                                                                         window.location.href = "/restaurants/";
+                                                                 }
+                                                                 else{
+                                                                        
+                                                                 }
+                                                                // window.location.href = "/restaurants/";
+                                                        },4000); 
                                                 }
                                                 else{
                                                         $('#result').html('Failed to make a server-side call. Check your configuration and console.')
