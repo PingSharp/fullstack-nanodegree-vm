@@ -6,7 +6,7 @@
     <body >
         <div class="menu_content">
     {% if res %}
-    <h1 class="restaurant_header">{{ res.name }}</h1>
+    <h1 class="restaurant_header"><a href="{{url_for('restaurants')}}">{{ res.name }}</a></h1>
     {% endif %}
     {% with messages = get_flashed_messages() %}  
     {% if messages %}

@@ -6,6 +6,7 @@
     <body>
         <div class="res_content">
         <h1 class="res_header">RESTAURANTS</h1>
+        <a href="{{url_for('disconnect')}}">Log out</a>
         {% with messages = get_flashed_messages() %}  
     {% if messages %}
     <ul>
