@@ -143,11 +143,17 @@ def gconnect():
         return response
     stored_access_token = login_session.get('access_token')
     stored_gplus_id = login_session.get('gplus_id')
+    login_session['access_token'] = credentials.access_token
+    login_session['provider'] = 'google'
     if stored_access_token is not None and gplus_id == stored_gplus_id:
-        response = make_response(json.dumps('Current user is already connected.'),
-                                 200)
-        response.headers['Content-Type'] = 'application/json'
-        return response
+        createUser(login_session)
+        if checkUserHasRestaurant(login_session['user_id']):
+            return redirect('/restaurants/')
+        else:
+            response = make_response('False',200)
+            response.headers['Content-Type'] = 'text/plain'
+            return response
+        
     login_session['access_token'] = credentials.access_token
     login_session['gplus_id'] = gplus_id
 
@@ -158,14 +164,56 @@ def gconnect():
     data = answer.json()
     user = session.query(User).filter_by(id=1).one();
     print user
+    
     login_session['username'] = data['name']
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
     createUser(login_session)
     if checkUserHasRestaurant(login_session['user_id']):
-         return redirect(url_for('restaurants'))
+        return redirect('/restaurants/')
     else:
-        return redirect(url_for('restaurantsforPublic'))
+        response = make_response('False',200)
+        response.headers['Content-Type'] = 'text/plain'
+        return response
+@app.route('/fconnect',methods=['POST'])
+def fconnect():
+    if request.args.get('state') != login_session['state']:
+        response = make_response(json.dumps('Invalid state parameter.'),401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    ht = httplib2.Http()
+    code = request.data
+    app_id = json.loads(open('fbSecret.json','r').read())['web']['app_id']
+    app_secret = json.loads(open('fbSecret.json','r').read())['web']['app_secret']
+    url = 'https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=%s&client_secret=%s&fb_exchange_token=%s'%(app_id,app_secret,code)
+    results = ht.request(url,'GET')[1]
+    print results
+    stringArray = results.split('"')
+    print stringArray
+    token = stringArray[3]
+    userInfoUrl = 'https://graph.facebook.com/v2.8/me?access_token=%s&fields=name,id,email'%token
+    h = httplib2.Http()
+    result = h.request(userInfoUrl,'GET')[1]
+    data = json.loads(result)
+    login_session['provider'] = 'facebook'
+    login_session['accesstoken'] = token
+    login_session['username'] = data['name']
+    login_session['facebookid'] = data['id']
+    login_session['email'] = data['email']
+    createUser(login_session)
+    if checkUserHasRestaurant(login_session['user_id']):
+        return redirect('/restaurants/')
+    else:
+        response = make_response('False',200)
+        response.headers['Content-Type'] = 'text/plain'
+        return response
+@app.route('/disconnect')
+def disconnect():
+    if login_session['provider'] == 'google':
+        return redirect(url_for('gdisconnect'))
+    elif login_session['provider'] == 'facebook':
+        return redirect(url_for('fdisconnect'))
+
 @app.route('/gdisconnect')
 def gdisconnect():
     access_token = login_session.get('access_token')
@@ -174,9 +222,7 @@ def gdisconnect():
         response = make_response(json.dump("current user not connected!"),401)
         response.headers['Content-Type'] = 'application/json'
         return response
-    print"access_token is %s"%access_token
-    print"user name is %s"%login_session['username']
-    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
+    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
     h = httplib2.Http()
     result1 = h.request(url,'GET')
     result2 = result1[0]
@@ -184,12 +230,21 @@ def gdisconnect():
     print result1
     print result2
     if result2['status'] == '200':
-        del login_session['access_token']
-        del login_session['gplus_id']
-        del login_session['username']
-        del login_session['email']
-        del login_session['picture']
-        del login_session['user_id']
+        if 'provider' in login_session:
+            del login_session['provider'] 
+        if 'gplus_id' in login_session:
+            del login_session['gplus_id']
+        if 'access_token' in login_session:
+            del login_session['access_token']
+        if 'username' in login_session:
+            del login_session['username']
+        if 'email' in login_session:
+            del login_session['email']
+        if 'picture' in login_session:
+            del login_session['picture']
+        if 'user_id' in login_session:
+            del login_session['user_id']
+       
         response = make_response(json.dumps("succesfully disconnected!"),200)
         response.headers['Content-Type'] = 'application/json'
         return response
@@ -197,7 +252,39 @@ def gdisconnect():
         response = make_response(json.dumps("Failed to revoke token for given user.",400))
         response.headers["Content-Type"] = 'application/json'
         return response
-
+@app.route('/fdisconnect')
+def fdisconnect():
+    facebookId = login_session.get('facebookid')
+    accessToken = login_session.get('accesstoken')
+    if accessToken is None:
+        print"token is none,the user is not connected"
+        response = make_response(json.dump("current user not connected!"),401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    print"user name is %s"%login_session['username']
+    url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (login_session['facebookid'],accessToken)
+    h = httplib2.Http()
+    result1 = h.request(url,'DELETE')[1]
+   
+    print result1
+    if 'provider' in login_session:
+        del login_session['provider'] 
+    if 'accesstoken' in login_session:
+        del login_session['accesstoken']
+    if 'facebookid' in login_session:
+        del login_session['facebookid']
+    if 'username' in login_session:
+        del login_session['username']
+    if 'email' in login_session:
+        del login_session['email']
+    if 'user_id' in login_session:
+        del login_session['user_id']
+    if 'picture' in login_session:
+        del login_session['picture']
+    response = make_response(json.dumps("succesfully disconnected!"),200)
+    response.headers['Content-Type'] = 'application/json'
+    return response
+   
 def createUser(login_session):
     userExist = getUserId(login_session['email'])
     if(userExist == None):
@@ -230,13 +317,27 @@ def checkUserHasRestaurant(userId):
 @app.route('/')
 @app.route('/restaurants/')
 def restaurants():
-    restaurants = getAllRestaurants()
-    return render_template('restaurants.html',res = restaurants)
+    if 'username' in login_session and 'user_id' in login_session:
+        if checkUserHasRestaurant(login_session['user_id']):
+
+            restaurants = getAllRestaurants()
+            return render_template('restaurants.html',res = restaurants)
+        else:
+            return redirect(url_for('restaurantsforPublic'))
+    else:
+        return redirect(url_for('showLogin'))
+
 @app.route('/')
 @app.route('/restaurantsforpublic/')
 def restaurantsforPublic():
-    restaurants = getAllRestaurants()
-    return render_template('restaurantspublic.html',res = restaurants)
+    if 'username' in login_session and 'user_id' in login_session:
+        if not checkUserHasRestaurant(login_session['user_id']):
+            restaurants = getAllRestaurants()
+            return render_template('restaurantspublic.html',res = restaurants)
+        else:
+            return redirect(url_for('restaurants'))
+    else:
+        return redirect(url_for('showLogin'))
 
 @app.route('/restaurants/<int:restaurant_id>/edit/',methods=('GET','POST'))
 def editRestaurant(restaurant_id):
